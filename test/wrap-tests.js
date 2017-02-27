@@ -27,7 +27,7 @@ class TestClass {
 describe('#wrap', () => {
 
     it('should create caches for function properties on an object', () => {
-        let wrapped = wrap(functionProperties, Infinity);
+        let wrapped = wrap(functionProperties);
         let r = wrapped.echo([1, 2, 3]);
         assert.deepEqual({input: [1,2,3]}, r);
         assert.equal(r, wrapped.echo([1, 2, 3]));
@@ -36,7 +36,7 @@ describe('#wrap', () => {
     });
 
     it('should create caches for functions attached to an objects prototype', () => {
-        let wrapped = wrap(new TestPrototype(), Infinity);
+        let wrapped = wrap(new TestPrototype());
         let r = wrapped.echo([1, 2, 3]);
         assert.deepEqual({input: [1,2,3]}, r);
         assert.equal(r, wrapped.echo([1, 2, 3]));
@@ -45,7 +45,7 @@ describe('#wrap', () => {
     });
 
     it('should create caches for class methods', () => {
-        let wrapped = wrap(new TestClass(), Infinity);
+        let wrapped = wrap(new TestClass());
         let r = wrapped.echo([1, 2, 3]);
         assert.deepEqual({input: [1,2,3]}, r);
         assert.equal(r, wrapped.echo([1, 2, 3]));
@@ -54,31 +54,31 @@ describe('#wrap', () => {
     });
 
     it('should not interfere with class cross calls', () => {
-        let wrapped = wrap(new TestClass(), Infinity);
+        let wrapped = wrap(new TestClass());
         let r = wrapped.callsEcho([1, 2, 3]);
         assert.deepEqual({input: [1,2,3]}, r);
     });
 
     it('should not interfere with prototype cross calls', () => {
-        let wrapped = wrap(new TestPrototype(), Infinity);
+        let wrapped = wrap(new TestPrototype());
         let r = wrapped.callsEcho([1, 2, 3]);
         assert.deepEqual({input: [1,2,3]}, r);
     });
 
     it('should deep wrap', () => {
-        let wrapped = wrap(new TestClass(), Infinity);
+        let wrapped = wrap(new TestClass());
         let r = wrapped.echo([1, 2, 3]);
         assert.equal(r, wrapped.callsEcho([1, 2, 3]));
     });
 
     it('should not deep wrap', () => {
-        let wrapped = wrap(new TestClass(), Infinity, true, false);
+        let wrapped = wrap(new TestClass(), {deep: false});
         let r = wrapped.echo([1, 2, 3]);
         assert.notEqual(r, wrapped.callsEcho([1, 2, 3]));
     });
 
     it('should not bind', () => {
-        let wrapped = wrap(new TestClass(), Infinity, false);
+        let wrapped = wrap(new TestClass(), {bind: false});
         assert.throws(() => wrapped.callsEcho([1, 2, 3]));
     })
 

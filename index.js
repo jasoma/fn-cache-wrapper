@@ -40,7 +40,7 @@ function methods(object) {
  * Create the cached version of a function optionally binding it.
  *
  * @param {function} dn - the function to cache.
- * @param {number} lifetime - the lifetime of the results in the cache.
+ * @param {number} lifetime - the cache lifetime of results.
  * @param {object} [self] - the object to bind the function to.
  */
 function createCacheFn(fn, lifetime, self) {
@@ -54,10 +54,14 @@ function createCacheFn(fn, lifetime, self) {
  * a new object with the cache functions attached.
  *
  * @param {object} object - the object whose methods should be cached.
- * @param {number} - the cache lifetime.
+ * @param {object} options
+ * @param {number} [options.lifetime=Infinity] - the cache lifetime of results.
+ * @param {boolean} [options.bind=true] - whether or not to bind functions being cached.
+ * @param {boolean} [options.deep=true] - if true functions will be bound to the create wrapper
+                                          so they call other cached functions.
  * @returns {object} - a new object containing the wrapped methods.
  */
-function wrap(object, lifetime, bind = true, deep = true) {
+function wrap(object, {lifetime = Infinity, bind = true, deep = true} = {}) {
     let cached = {};
     for (let method of methods(object)) {
         let self;
@@ -73,9 +77,11 @@ function wrap(object, lifetime, bind = true, deep = true) {
  * Replaces each function in an object with a cached version using fn-cache.
  *
  * @param {object} object - the object whose methods should be cached.
- * @param {number} - the cache lifetime.
+ * @param {object} options
+ * @param {number} [options.lifetime=Infinity] - the cache lifetime of results.
+ * @param {boolean} [options.bind=true] - whether or not to bind functions being cached.
  */
-function replace(object, lifetime, bind = true, deep = true) {
+function replace(object, {lifetime = Infinity, bind = true } = {}) {
     for (let method of methods(object)) {
         object[method.name] = createCacheFn(method.fn, lifetime, (bind ? object : null));
     }

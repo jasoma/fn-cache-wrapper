@@ -26,7 +26,7 @@ describe('#replace', () => {
                 return { input };
             }
         }
-        replace(target, Infinity);
+        replace(target);
         let r = target.echo([1, 2, 3]);
         assert.deepEqual({input: [1,2,3]}, r);
         assert.equal(r, target.echo([1, 2, 3]));
@@ -36,7 +36,7 @@ describe('#replace', () => {
 
     it('should create caches for functions attached to an objects prototype', () => {
         let target = new TestPrototype();
-        replace(target, Infinity);
+        replace(target);
         let r = target.echo([1, 2, 3]);
         assert.deepEqual({input: [1,2,3]}, r);
         assert.equal(r, target.echo([1, 2, 3]));
@@ -46,7 +46,7 @@ describe('#replace', () => {
 
     it('should create caches for class methods', () => {
         let target = new TestClass();
-        replace(target, Infinity);
+        replace(target);
         let r = target.echo([1, 2, 3]);
         assert.deepEqual({input: [1,2,3]}, r);
         assert.equal(r, target.echo([1, 2, 3]));
@@ -56,21 +56,21 @@ describe('#replace', () => {
 
     it('should not interfere with class cross calls', () => {
         let target = new TestClass();
-        replace(target, Infinity);
+        replace(target);
         let r = target.callsEcho([1, 2, 3]);
         assert.deepEqual({input: [1,2,3]}, r);
     });
 
     it('should not interfere with prototype cross calls', () => {
         let target = new TestPrototype();
-        replace(target, Infinity);
+        replace(target);
         let r = target.callsEcho([1, 2, 3]);
         assert.deepEqual({input: [1,2,3]}, r);
     });
 
     it('should not bind', () => {
         let target = new TestPrototype();
-        replace(target, Infinity, false);
+        replace(target, {bind: false});
         assert.throws(() => target.callsEcho([1, 2, 3]));
     })
 
