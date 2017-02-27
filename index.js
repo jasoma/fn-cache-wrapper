@@ -59,11 +59,16 @@ function createCacheFn(fn, lifetime, self) {
  * @param {boolean} [options.bind=true] - whether or not to bind functions being cached.
  * @param {boolean} [options.deep=true] - if true functions will be bound to the create wrapper
                                           so they call other cached functions.
+ * @param {string[]} [options.exclude=[]] - function names to exclude from caching.
  * @returns {object} - a new object containing the wrapped methods.
  */
-function wrap(object, {lifetime = Infinity, bind = true, deep = true} = {}) {
+function wrap(object, { lifetime = Infinity, bind = true, deep = true, exclude = [] } = {}) {
     let cached = {};
     for (let method of methods(object)) {
+        if (exclude.includes(method.name)) {
+            cached[method.name] = method.fn;
+            continue;
+        }
         let self;
         if (bind) {
             self = deep ? cached : object;
@@ -80,9 +85,13 @@ function wrap(object, {lifetime = Infinity, bind = true, deep = true} = {}) {
  * @param {object} options
  * @param {number} [options.lifetime=Infinity] - the cache lifetime of results.
  * @param {boolean} [options.bind=true] - whether or not to bind functions being cached.
+ * @param {string[]} [options.exclude=[]] - function names to exclude from caching.
  */
-function replace(object, {lifetime = Infinity, bind = true } = {}) {
+function replace(object, { lifetime = Infinity, bind = true, exclude = [] } = {}) {
     for (let method of methods(object)) {
+        if (exclude.includes(method.name)) {
+            continue;
+        }
         object[method.name] = createCacheFn(method.fn, lifetime, (bind ? object : null));
     }
 }

@@ -94,6 +94,17 @@ describe('#wrap', () => {
     it('should not bind', () => {
         let wrapped = wrap(new TestClass(), {bind: false});
         assert.throws(() => wrapped.callsEcho([1, 2, 3]));
-    })
+    });
+
+    it('should exclude functions', () => {
+        let wrapped = wrap(new TestClass(), {exclude: ['echo']});
+        assert.notEqual(wrapped.echo([1, 2, 3]), wrapped.echo([1, 2, 3]));
+        assert.ok(wrapped.callsEcho([1, 2, 3]));
+    });
+
+    it('can still cross call after exclude', () => {
+        let wrapped = wrap(new TestClass(), {exclude: ['callsEcho']});
+        assert.equal(wrapped.callsEcho([1, 2, 3]), wrapped.callsEcho([1, 2, 3]));
+    });
 
 });

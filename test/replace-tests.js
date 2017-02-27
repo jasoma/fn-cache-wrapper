@@ -87,6 +87,19 @@ describe('#replace', () => {
         let target = new TestPrototype();
         replace(target, {bind: false});
         assert.throws(() => target.callsEcho([1, 2, 3]));
-    })
+    });
+
+    it('should exclude functions', () => {
+        let target = new TestClass();
+        replace(target, {exclude: ['echo']});
+        assert.notEqual(target.echo([1, 2, 3]), target.echo([1, 2, 3]));
+        assert.ok(target.callsEcho([1, 2, 3]));
+    });
+
+    it('can still cross call after exclude', () => {
+        let target = new TestClass();
+        replace(target, {exclude: ['callsEcho']});
+        assert.equal(target.callsEcho([1, 2, 3]), target.callsEcho([1, 2, 3]));
+    });
 
 });
