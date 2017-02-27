@@ -53,6 +53,20 @@ describe('#wrap', () => {
         assert.notEqual(r, wrapped.echo([1, 2, 3]));
     });
 
+    it('should respect the cache lifetime', done => {
+        let wrapped = wrap(new TestClass(), {lifetime: 100});
+        let r = wrapped.echo([1, 2, 3]);
+        setTimeout(() => {
+            let r2 = wrapped.echo([1, 2, 3]);
+            if (r == r2) {
+                done(new Error('cache was not cleared'));
+            }
+            else {
+                done();
+            }
+        }, 110);
+    });
+
     it('should not interfere with class cross calls', () => {
         let wrapped = wrap(new TestClass());
         let r = wrapped.callsEcho([1, 2, 3]);

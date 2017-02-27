@@ -54,6 +54,21 @@ describe('#replace', () => {
         assert.notEqual(r, target.echo([1, 2, 3]));
     });
 
+    it('should respect the cache lifetime', done => {
+        let target = new TestClass();
+        replace(target, {lifetime: 100});
+        let r = target.echo([1, 2, 3]);
+        setTimeout(() => {
+            let r2 = target.echo([1, 2, 3]);
+            if (r == r2) {
+                done(new Error('cache was not cleared'));
+            }
+            else {
+                done();
+            }
+        }, 110);
+    });
+
     it('should not interfere with class cross calls', () => {
         let target = new TestClass();
         replace(target);
