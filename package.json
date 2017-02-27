@@ -14,7 +14,8 @@
   "author": "Jason Maher <jason@jasonmaher.me>",
   "license": "MIT",
   "dependencies": {
-    "fn-cache": "^1.0.8"
+    "fn-cache": "^1.0.8",
+    "lodash.isfunction": "^3.0.8"
   },
   "devDependencies": {
     "mocha": "^3.2.0"
