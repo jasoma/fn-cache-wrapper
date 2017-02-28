@@ -27,9 +27,10 @@ class ApiClient {
 
 let client = new ApiClient();
 let cachedClient = wrap(client, { lifetime: 2000 });
-```
 
-`cachedClient` will hold cached responses for 2000ms and we the uncached version can still be used separately. 
+// response will be cached
+cachedClient.things();
+``` 
 
 `wrap` is useful when you need want to deduplicate all client calls within a request without needing to manage a separate cache. Just wrap the client and at the end of the request throw the wrapper away.
 
@@ -50,9 +51,10 @@ class ApiClient {
 
 let client = new ApiClient();
 replace(client, { lifetime: 2000 });
-```
 
-`client` will hold cached responses for 2000ms.
+// response will be cached
+client.things();
+```
 
 `replace` is useful when you want default caching behavior for a client always.
 
@@ -68,12 +70,11 @@ client.things.clearCache();
 
 ## Configuration
 
-### Deep caching
+### Deep caching *[`wrap`]*
 
-The object being wrapped may call other functions defined on itself.
+When using `wrap` the object being wrapped may call other functions defined on itself.
 
 ```js
-
 class ApiClient {
 
   me() {
@@ -88,7 +89,7 @@ class ApiClient {
 }
 ```
 
-By default both `wrap` will bind the functions being cached such that calls like `this.me()` will go to the cached version and not the uncached version. This can be disabled by passing `{ deep: false }` when creating the wrapper.
+By default `wrap` will bind the functions being cached such that calls like `this.me()` will go to the cached version and not the uncached version. This can be disabled by passing `{ deep: false }` when creating the wrapper.
 
 ```js
 const { wrap } = require('fn-cache-wrapper');
@@ -101,7 +102,39 @@ client.me();         // will get the cached result
 client.myThings();   // will not use the cached 'me()' result.
 ```
 
-### Excluding functions
+### Property copying *[`wrap`]*
+
+When using `wrap` property values are **copied** from the original object.
+
+```js
+const { wrap } = require('fn-cache-wrapper');
+
+class ApiClient {
+
+  constructor() {
+    this.host = 'http://api.domain.com';
+  }
+
+  me() {
+    return request(`${this.host}/users/me`);
+  }
+  
+}
+
+let client = new ApiClient();
+let cached = wrap(new ApiClient(), { lifetime: 2000 });
+
+
+cached.me()   // access to 'this.host' will work
+
+client.host = 'http://api-2.domain.com';
+client.me.clearCache();
+client.me()   // still using 'http://api.domain.com'
+```
+
+Property copying can be turned off be passing  `{ props: false }` in the options.
+
+### Excluding functions *[`wrap`, `replace`]*
 
 An array of function names can be passed under the `exclude` option to skip caching.
 
@@ -115,7 +148,7 @@ client.me();         // will not be cached
 client.myThings();   // the result of 'myThings()' will be cached
 ```
 
-### No binding
+### No binding *[`wrap`, `replace`]*
 
 If you do not want the functions to be bound to the containing object use the `{ bind: false }` option. Obviously this is only useful when you *want* the `this` reference to be context specific and not in the class examples used thus far.
 
