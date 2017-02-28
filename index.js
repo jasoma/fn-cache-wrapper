@@ -1,5 +1,6 @@
 const cache = require('fn-cache');
 const isFunction = require('lodash.isfunction');
+const merge = require('lodash.merge');
 
 function ownProps(object) {
     return Object.getOwnPropertyNames(object);
@@ -62,8 +63,8 @@ function createCacheFn(fn, lifetime, self) {
  * @param {string[]} [options.exclude=[]] - function names to exclude from caching.
  * @returns {object} - a new object containing the wrapped methods.
  */
-function wrap(object, { lifetime = Infinity, bind = true, deep = true, exclude = [] } = {}) {
-    let cached = {};
+function wrap(object, { lifetime = Infinity, bind = true, deep = true, props = true, exclude = [] } = {}) {
+    let cached = props ? merge({}, object) : object;
     for (let method of methods(object)) {
         if (exclude.includes(method.name)) {
             cached[method.name] = method.fn;

@@ -1,5 +1,6 @@
 const assert = require('assert');
 const { wrap } = require('..');
+const merge = require('lodash.merge');
 
 let functionProperties = {
     echo(input) {
@@ -7,20 +8,31 @@ let functionProperties = {
     }
 }
 
-function TestPrototype() {}
+function TestPrototype() {
+    this.prop = 'foo';
+}
 TestPrototype.prototype.echo = function(input) {
     return { input };
 }
 TestPrototype.prototype.callsEcho = function(input) {
     return this.echo(input);
 }
+TestPrototype.prototype.getProp = function() {
+    return this.prop;
+}
 
 class TestClass {
+    constructor() {
+        this.prop = 'foo';
+    }
     echo(input) {
         return { input };
     }
     callsEcho(input) {
         return this.echo(input);
+    }
+    getProp() {
+        return this.prop;
     }
 }
 
@@ -105,6 +117,30 @@ describe('#wrap', () => {
     it('can still cross call after exclude', () => {
         let wrapped = wrap(new TestClass(), {exclude: ['callsEcho']});
         assert.equal(wrapped.callsEcho([1, 2, 3]), wrapped.callsEcho([1, 2, 3]));
+    });
+
+    it('should preserve property access', () => {
+        let obj = merge({ prop: 'foo'}, functionProperties);
+        let wrapped = wrap(obj);
+        assert.equal('foo', wrapped.prop);
+    });
+
+    it('should preserve property access in classes', () => {
+        let wrapped = wrap(new TestClass());
+        assert.equal('foo', wrapped.prop);
+        assert.equal('foo', wrapped.getProp());
+    });
+
+    it('should preserve property access in prototypes', () => {
+        let wrapped = wrap(new TestPrototype());
+        assert.equal('foo', wrapped.prop);
+        assert.equal('foo', wrapped.getProp());
+    });
+
+    it('should not copy properties', () => {
+        let obj = merge({ prop: 'foo'}, functionProperties);
+        let wrapped = wrap(obj, {props: false});
+        assert(wrapped.foo == undefined);
     });
 
 });

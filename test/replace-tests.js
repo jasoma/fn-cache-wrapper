@@ -1,20 +1,31 @@
 const assert = require('assert');
 const { replace } = require('..');
 
-function TestPrototype() {}
+function TestPrototype() {
+    this.prop = 'foo';
+}
 TestPrototype.prototype.echo = function(input) {
     return { input };
 }
 TestPrototype.prototype.callsEcho = function(input) {
     return this.echo(input);
 }
+TestPrototype.prototype.getProp = function() {
+    return this.prop;
+}
 
 class TestClass {
+    constructor() {
+        this.prop = 'foo';
+    }
     echo(input) {
         return { input };
     }
     callsEcho(input) {
         return this.echo(input);
+    }
+    getProp() {
+        return this.prop;
     }
 }
 
@@ -100,6 +111,31 @@ describe('#replace', () => {
         let target = new TestClass();
         replace(target, {exclude: ['callsEcho']});
         assert.equal(target.callsEcho([1, 2, 3]), target.callsEcho([1, 2, 3]));
+    });
+
+    it('should preserve property access', () => {
+        let target = {
+            echo(input) {
+                return { input };
+            },
+            prop: 'foo'
+        }
+        replace(target);
+        assert.equal('foo', target.prop);
+    });
+
+    it('should preserve property access in classes', () => {
+        let target = new TestClass();
+        replace(target);
+        assert.equal('foo', target.prop);
+        assert.equal('foo', target.getProp());
+    });
+
+    it('should preserve property access in prototypes', () => {
+        let target = new TestPrototype();
+        replace(target);
+        assert.equal('foo', target.prop);
+        assert.equal('foo', target.getProp());
     });
 
 });
